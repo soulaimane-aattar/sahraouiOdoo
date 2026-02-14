@@ -33,11 +33,14 @@ shell-odoo:
 	$(COMPOSE) exec saharawi-odoo bash
 
 init-db:
-	$(COMPOSE) up -d saharawi-db saharawi-odoo
+	$(COMPOSE) up -d saharawi-db
+	$(COMPOSE) stop saharawi-odoo
 	$(COMPOSE) exec -T saharawi-db sh -lc 'psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "ALTER ROLE \"$$POSTGRES_USER\" WITH PASSWORD '\''$$POSTGRES_PASSWORD'\'';"'
-	$(COMPOSE) exec -T saharawi-odoo /entrypoint.sh odoo -d "$$DATABASE" -i base -u base,web --without-demo=all --stop-after-init
+	$(COMPOSE) run --rm saharawi-odoo /entrypoint.sh odoo -d "$$DATABASE" -i base -u base,web --without-demo=all --stop-after-init
+	$(COMPOSE) up -d saharawi-odoo
 
 reset-db:
+	$(COMPOSE) stop saharawi-odoo
 	$(COMPOSE) up -d saharawi-db
 	$(COMPOSE) exec -T saharawi-db sh -lc 'psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='\''$$POSTGRES_DB'\'';"'
 	$(COMPOSE) exec -T saharawi-db sh -lc 'psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d postgres -c "DROP DATABASE IF EXISTS \"$$POSTGRES_DB\";"'
