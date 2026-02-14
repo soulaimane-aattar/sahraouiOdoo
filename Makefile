@@ -4,7 +4,7 @@
 COMPOSE = docker compose
 SERVICES = saharawi-odoo saharawi-db
 
-.PHONY: all build up down logs shell-db shell-odoo ps clean init-db reset-db
+.PHONY: all build up down logs shell-db shell-odoo ps clean init-db reset-db bootstrap
 
 all: build up
 
@@ -34,10 +34,13 @@ shell-odoo:
 
 init-db:
 	$(COMPOSE) up -d saharawi-db
+	$(COMPOSE) exec -T saharawi-db sh -lc 'until pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" >/dev/null 2>&1; do sleep 1; done'
 	$(COMPOSE) stop saharawi-odoo
 	$(COMPOSE) exec -T saharawi-db sh -lc 'psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "ALTER ROLE \"$$POSTGRES_USER\" WITH PASSWORD '\''$$POSTGRES_PASSWORD'\'';"'
 	$(COMPOSE) run --rm saharawi-odoo /entrypoint.sh odoo -d "$$DATABASE" -i base -u base,web --without-demo=all --stop-after-init
 	$(COMPOSE) up -d saharawi-odoo
+
+bootstrap: init-db
 
 reset-db:
 	$(COMPOSE) stop saharawi-odoo

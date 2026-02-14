@@ -30,6 +30,7 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     volumes:
       - odoo-web-data:/var/lib/odoo
+      - odoo-runtime-addons:/var/lib/odoo/addons/18.0
       - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
       - ./addons:/mnt/extra-addons
     networks:
@@ -39,6 +40,7 @@ services:
 volumes:
   odoo-db-data:
   odoo-web-data:
+  odoo-runtime-addons:
 
 networks:
   sahraoui-odoo:
