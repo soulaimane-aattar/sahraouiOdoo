@@ -8,6 +8,8 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - odoo-db-data:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
     networks:
       - sahraoui-odoo
 
@@ -18,7 +20,7 @@ services:
     depends_on:
       - saharawi-db
     ports:
-      - "18069:8069"
+      - "8070:8070"
     environment:
       DATABASE: ${DATABASE}
       HOST: ${DB_HOST}
@@ -31,8 +33,8 @@ services:
       - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
       - ./addons:/mnt/extra-addons
     networks:
-      - sahraoui-odoo
-      - nginx-proxy
+      sahraoui-odoo:
+      nginx-proxy:
 
 volumes:
   odoo-db-data:
