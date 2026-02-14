@@ -1,5 +1,6 @@
 services:
-  db:
+  saharawi-db:
+    container_name: saharawi-db
     image: postgres:13-alpine
     environment:
       POSTGRES_DB: ${DATABASE}
@@ -10,12 +11,12 @@ services:
     networks:
       - sahraoui-odoo
 
-  odoo:
-    container_name: sahraoui-odoo
+  saharawi-odoo:
+    container_name: saharawi-odoo
     # build: .
     image: odoo:18.0-20250415
     depends_on:
-      - db
+      - saharawi-db
     ports:
       - "18069:8069"
     environment:
