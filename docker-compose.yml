@@ -20,7 +20,7 @@ services:
     depends_on:
       - saharawi-db
     ports:
-      - "8070:8070"
+      - "8070:8069"
     environment:
       DATABASE: ${DATABASE}
       HOST: ${DB_HOST}
