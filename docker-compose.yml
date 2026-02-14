@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:13-alpine
@@ -16,11 +14,18 @@ services:
     container_name: sahraoui-odoo
     # build: .
     image: odoo:18.0-20250415
+    command:
+      - odoo
+      - --db_host=${DB_HOST}
+      - --db_port=5432
+      - --db_user=${DB_USER}
+      - --db_password=${DB_PASSWORD}
     depends_on:
       - db
     ports:
       - "18069:8069"
     environment:
+      DATABASE: ${DATABASE}
       HOST: ${DB_HOST}
       PORT: 5432
       USER: ${DB_USER}
