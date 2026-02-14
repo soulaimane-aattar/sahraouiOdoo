@@ -33,6 +33,8 @@ shell-odoo:
 	$(COMPOSE) exec odoo bash
 
 init-db:
+	$(COMPOSE) up -d db odoo
+	$(COMPOSE) exec -T db sh -lc 'psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "ALTER ROLE \"$$POSTGRES_USER\" WITH PASSWORD '\''$$POSTGRES_PASSWORD'\'';"'
 	$(COMPOSE) exec -T odoo odoo -c /etc/odoo/odoo.conf -d odoo -i base --without-demo=all --stop-after-init
 
 clean:
