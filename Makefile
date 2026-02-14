@@ -37,6 +37,7 @@ init-db:
 	$(COMPOSE) exec -T saharawi-db sh -lc 'until pg_isready -h 127.0.0.1 -U "$$POSTGRES_USER" >/dev/null 2>&1; do sleep 1; done'
 	$(COMPOSE) stop saharawi-odoo
 	$(COMPOSE) exec -T saharawi-db sh -lc 'psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -c "ALTER ROLE \"$$POSTGRES_USER\" WITH PASSWORD '\''$$POSTGRES_PASSWORD'\'';"'
+	$(COMPOSE) exec -T saharawi-db sh -lc 'if [ "$$(psql -U "$$POSTGRES_USER" -d "$$POSTGRES_DB" -tAc "SELECT to_regclass('\''public.ir_module_module'\'');")" = "public.ir_module_module" ]; then echo "Odoo schema detected in $$POSTGRES_DB"; else echo "Odoo schema missing in $$POSTGRES_DB, recreating database"; psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='\''$$POSTGRES_DB'\'';"; psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d postgres -c "DROP DATABASE IF EXISTS \"$$POSTGRES_DB\";"; psql -v ON_ERROR_STOP=1 -U "$$POSTGRES_USER" -d postgres -c "CREATE DATABASE \"$$POSTGRES_DB\" OWNER \"$$POSTGRES_USER\";"; fi'
 	$(COMPOSE) run --rm saharawi-odoo /entrypoint.sh odoo -d "$$DATABASE" -i base -u base,web --without-demo=all --stop-after-init
 	$(COMPOSE) up -d saharawi-odoo
 
