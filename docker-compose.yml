@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_DB: ${DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - odoo-db-data:/var/lib/postgresql/data
+    networks:
+      - nginx-proxy
+
+  odoo:
+    container_name: sahraoui-odoo
+    # build: .
+    image: odoo:18.0-20250415
+    depends_on:
+      - db
+    ports:
+      - "18069:8069"
+    environment:
+      HOST: ${DB_HOST}
+      PORT: 5432
+      USER: ${DB_USER}
+      PASSWORD: ${DB_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+    volumes:
+      - odoo-web-data:/var/lib/odoo
+      - ./config/odoo.conf:/etc/odoo/odoo.conf:ro
+      - ./addons:/mnt/extra-addons
+    networks:
+      - nginx-proxy
+
+volumes:
+  odoo-db-data:
+  odoo-web-data:
+
+networks:
+  nginx-proxy:
+      external: true
